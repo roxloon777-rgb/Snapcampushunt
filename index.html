@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AR Treasure Hunt</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.min.js"></script>
+  </head>
+
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      id="scene"
+      embedded
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; antialias: true;"
+      arjs="sourceType: webcam; facingMode: environment; debugUIEnabled: false; patternRatio: 0.9;">
+      
+      <!-- Marker (HIRO) -->
+      <a-marker preset="hiro">
+        <!-- 3D Treasure -->
+        <a-entity
+          id="treasure"
+          gltf-model="assets/models/treasure.glb"
+          scale="0.5 0.5 0.5"
+          rotation="0 180 0"
+          animation="property: rotation; to: 0 540 0; loop: true; dur: 4000">
+        </a-entity>
+
+        <!-- Text label -->
+        <a-text
+          value="You found a Treasure!"
+          position="0 1 0"
+          align="center"
+          color="#FFD700"
+          width="4">
+        </a-text>
+      </a-marker>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- 📸 Screenshot Button -->
+    <button id="snapBtn" style="
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.85); border: none; border-radius: 50%;
+      width: 70px; height: 70px; font-size: 24px; cursor: pointer; z-index: 5;">
+      📸
+    </button>
+
+    <!-- 🔁 Flip Camera Button -->
+    <button id="flipBtn" style="
+      position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.85); border: none; border-radius: 12px;
+      padding: 10px 16px; font-size: 16px; cursor: pointer; z-index: 5;">
+      🔁 Flip Camera
+    </button>
+
+    <script>
+      const snapBtn = document.getElementById('snapBtn');
+      const flipBtn = document.getElementById('flipBtn');
+      const scene = document.getElementById('scene');
+      let usingFront = false;
+
+      // 📸 Take Screenshot
+      snapBtn.addEventListener('click', () => {
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.components.screenshot.capture('perspective');
+        const screenshot = sceneEl.components.screenshot.getCanvas('perspective');
+        const img = screenshot.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'ARphoto.png';
+        link.href = img;
+        link.click();
+      });
+
+      // 🔁 Flip Camera (restart scene with opposite facingMode)
+      flipBtn.addEventListener('click', () => {
+        usingFront = !usingFront;
+        const mode = usingFront ? 'user' : 'environment';
+
+        // Replace the arjs attribute to restart camera stream
+        scene.setAttribute('arjs', `sourceType: webcam; facingMode: ${mode}; debugUIEnabled: false; patternRatio: 0.9;`);
+      });
+    </script>
+  </body>
+</html>
