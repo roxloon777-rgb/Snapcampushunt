@@ -82,8 +82,9 @@ function positionHotspots() {
 
     if(collected[h.id]) el.classList.add('collected');
 
+    // Fixed hotspot link: open existing ar.html with id
     el.onclick = () => {
-      window.location.href = `ar-marker.html?id=${h.id}`;
+      window.location.href = `ar.html?id=${h.id}`;
     };
   });
 }
@@ -99,3 +100,4 @@ document.getElementById('startButton').addEventListener('click', () => {
 
 </body>
 </html>
+
