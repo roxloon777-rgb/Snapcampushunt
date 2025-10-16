@@ -27,32 +27,12 @@
   <a-entity light="type: directional; intensity: 0.8" position="1 3 2"></a-entity>
   <a-camera id="camera" position="0 1.6 0"></a-camera>
 
-  <!-- Calvyn Fountain marker -->
-  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="lawMarker">
-    <a-entity gltf-model="models/meet_mira.glb" scale="1.5 1.5 1.5" position="0 0 0" rotation="0 180 0"></a-entity>
+  <!-- Single Hiro marker -->
+  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="singleMarker">
+    <a-entity id="modelEntity" gltf-model="" scale="1.5 1.5 1.5" position="0 0 0" rotation="0 180 0"></a-entity>
     <a-plane width="2" height="0.8" position="1.5 1 0" rotation="-10 0 0"
              material="color: #7546A2; opacity: 0.9">
-      <a-text value="Well done! You found the Calvyn Fountain" color="#fff" align="center"
-              width="2" position="0 0 0.01"></a-text>
-    </a-plane>
-  </a-marker>
-
-  <!-- Lover's Lane marker -->
-  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="loversMarker">
-    <a-entity gltf-model="models/meet_mira.glb" scale="1.5 1.5 1.5" position="0 0 0" rotation="0 180 0"></a-entity>
-    <a-plane width="2" height="0.8" position="1.5 1 0" rotation="-10 0 0"
-             material="color: #7546A2; opacity: 0.9">
-      <a-text value="Well done! You found Lover's Lane" color="#fff" align="center"
-              width="2" position="0 0 0.01"></a-text>
-    </a-plane>
-  </a-marker>
-
-  <!-- Acacia Tree marker -->
-  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="treeMarker">
-    <a-entity gltf-model="models/meet_mira.glb" scale="1.5 1.5 1.5" position="0 0 0" rotation="0 180 0"></a-entity>
-    <a-plane width="2" height="0.8" position="1.5 1 0" rotation="-10 0 0"
-             material="color: #7546A2; opacity: 0.9">
-      <a-text value="Well done! You found the Acacia Tree" color="#fff" align="center"
+      <a-text id="markerText" value="" color="#fff" align="center"
               width="2" position="0 0 0.01"></a-text>
     </a-plane>
   </a-marker>
@@ -68,21 +48,28 @@ const collected = JSON.parse(localStorage.getItem('collected') || '{}');
 let lastSelfieData = null;
 let lastCollectedId = null;
 
-const markers = ['lawMarker','loversMarker','treeMarker'];
-const hotspotIds = ['law','lovers','tree'];
+// Get the hotspot id from the URL
+const params = new URLSearchParams(window.location.search);
+const hotspotId = params.get('id');
 
-markers.forEach((markerId,i)=>{
-  const marker = document.getElementById(markerId);
-  marker.addEventListener('markerFound', ()=>{
-    const hotspotId = hotspotIds[i];
-    if(!collected[hotspotId]){
-      collected[hotspotId] = true;
-      localStorage.setItem('collected', JSON.stringify(collected));
-      lastCollectedId = hotspotId;
-      alert(`Well done! You found ${hotspotId.toUpperCase()}`);
-    }
-  });
-});
+const hotspotData = {
+  law: { model: "models/meet_mira.glb", text: "Well done! You found the Calvyn Fountain" },
+  lovers: { model: "models/meet_mira.glb", text: "Well done! You found Lover's Lane" },
+  tree: { model: "models/meet_mira.glb", text: "Well done! You found the Acacia Tree" }
+};
+
+// Load correct model and text
+if(hotspotId && hotspotData[hotspotId]){
+  document.getElementById('modelEntity').setAttribute('gltf-model', hotspotData[hotspotId].model);
+  document.getElementById('markerText').setAttribute('value', hotspotData[hotspotId].text);
+
+  if(!collected[hotspotId]){
+    collected[hotspotId] = true;
+    localStorage.setItem('collected', JSON.stringify(collected));
+    lastCollectedId = hotspotId;
+    alert(hotspotData[hotspotId].text);
+  }
+}
 
 // Selfie capture
 document.getElementById('takeSelfie').addEventListener('click', ()=>{
@@ -116,4 +103,3 @@ document.getElementById('backMap').addEventListener('click', ()=>{
 
 </body>
 </html>
-
