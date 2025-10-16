@@ -19,12 +19,16 @@
     }
     #startScreen button:hover { background: #0056b3; }
 
+    /* Map container */
     #mapContainer { width: 100%; height: 100vh; position: relative; overflow: hidden; }
     #mapImage { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Hotspots */
     .hotspot {
       position: absolute; background: rgba(109, 62, 146, 0.8); color: white;
       padding: 6px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;
       transform: translate(-50%, -50%);
+      white-space: nowrap;
     }
     .collected { background: rgba(0,200,0,0.8); }
   </style>
@@ -40,27 +44,48 @@
 
 <div id="mapContainer">
   <img id="mapImage" src="assets/Map2.png" alt="Map">
+
   <div class="hotspot" id="law">Calvyn Fountain</div>
   <div class="hotspot" id="lovers">Lover's Lane</div>
   <div class="hotspot" id="tree">Acacia Tree</div>
 </div>
 
 <script>
+const MAP_WIDTH = 3508;   // Original map width in pixels
+const MAP_HEIGHT = 2481;  // Original map height in pixels
+
 const gpsHotspots = [
-  {id:'law', lat:-26.688737, lon:27.091276},
-  {id:'lovers', lat:-26.688676, lon:27.092549},
-  {id:'tree', lat:-26.688878, lon:27.092565}
+  {id:'law', lat:-26.688737, lon:27.091276, x:1384, y:708},
+  {id:'lovers', lat:-26.688676, lon:27.092549, x:1888, y:858},
+  {id:'tree', lat:-26.688878, lon:27.092565, x:1202, y:1545}
 ];
 
+// Load collected status
 const collected = JSON.parse(localStorage.getItem('collected') || '{}');
 
-gpsHotspots.forEach(h => {
-  const el = document.getElementById(h.id);
-  if(collected[h.id]) el.classList.add('collected');
-  el.onclick = () => {
-    window.location.href = `ar-marker.html?id=${h.id}`;
-  };
-});
+// Position hotspots on map
+function positionHotspots() {
+  const rect = document.getElementById('mapImage').getBoundingClientRect();
+  const scaleX = rect.width / MAP_WIDTH;
+  const scaleY = rect.height / MAP_HEIGHT;
+
+  gpsHotspots.forEach(h => {
+    const el = document.getElementById(h.id);
+    const left = h.x * scaleX;
+    const top = h.y * scaleY;
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
+
+    if(collected[h.id]) el.classList.add('collected');
+
+    el.onclick = () => {
+      window.location.href = `ar-marker.html?id=${h.id}`;
+    };
+  });
+}
+
+window.addEventListener('resize', positionHotspots);
+window.onload = positionHotspots;
 
 // Start overlay
 document.getElementById('startButton').addEventListener('click', () => {
@@ -70,3 +95,4 @@ document.getElementById('startButton').addEventListener('click', () => {
 
 </body>
 </html>
+
