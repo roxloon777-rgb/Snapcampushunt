@@ -6,13 +6,14 @@
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin:0; overflow:hidden; }
     button {
       position: fixed; left: 50%; transform: translateX(-50%);
       z-index: 1000; padding: 10px 20px; font-size: 18px;
     }
     #takeSelfie { bottom: 20px; }
     #uploadPadlet { bottom: 70px; display:none; }
+    #backMap { bottom: 120px; }
   </style>
 </head>
 <body>
@@ -24,12 +25,11 @@
 >
   <a-entity light="type: ambient; color: #ffffff; intensity: 0.6"></a-entity>
   <a-entity light="type: directional; intensity: 0.8" position="1 3 2"></a-entity>
-
   <a-camera id="camera" position="0 1.6 0"></a-camera>
 
-  <!-- Markers -->
-  <a-marker type="hiro" id="lawMarker">
-    <a-entity gltf-model="models/meet_mira.glb" scale="1 1 1" rotation="0 180 0"></a-entity>
+  <!-- Calvyn Fountain marker -->
+  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="lawMarker">
+    <a-entity gltf-model="models/meet_mira.glb" scale="1.5 1.5 1.5" rotation="0 180 0" position="0 0 0"></a-entity>
     <a-plane width="2" height="0.8" position="1.5 1 0" rotation="-10 0 0"
              material="color: #7546A2; opacity: 0.9">
       <a-text value="Well done! You found the Calvyn Fountain" color="#fff" align="center"
@@ -37,8 +37,9 @@
     </a-plane>
   </a-marker>
 
-  <a-marker type="hiro" id="loversMarker">
-    <a-entity gltf-model="models/meet_mira.glb" scale="1 1 1" rotation="0 180 0"></a-entity>
+  <!-- Lover's Lane marker -->
+  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="loversMarker">
+    <a-entity gltf-model="models/meet_mira.glb" scale="1.5 1.5 1.5" rotation="0 180 0" position="0 0 0"></a-entity>
     <a-plane width="2" height="0.8" position="1.5 1 0" rotation="-10 0 0"
              material="color: #7546A2; opacity: 0.9">
       <a-text value="Well done! You found Lover's Lane" color="#fff" align="center"
@@ -46,8 +47,9 @@
     </a-plane>
   </a-marker>
 
-  <a-marker type="hiro" id="treeMarker">
-    <a-entity gltf-model="models/meet_mira.glb" scale="1 1 1" rotation="0 180 0"></a-entity>
+  <!-- Acacia Tree marker -->
+  <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/patt.hiro" id="treeMarker">
+    <a-entity gltf-model="models/meet_mira.glb" scale="1.5 1.5 1.5" rotation="0 180 0" position="0 0 0"></a-entity>
     <a-plane width="2" height="0.8" position="1.5 1 0" rotation="-10 0 0"
              material="color: #7546A2; opacity: 0.9">
       <a-text value="Well done! You found the Acacia Tree" color="#fff" align="center"
@@ -59,47 +61,59 @@
 
 <button id="takeSelfie">Take Selfie</button>
 <button id="uploadPadlet">Upload to Padlet</button>
+<button id="backMap">Back to Map</button>
 
 <script>
-  const collected = JSON.parse(localStorage.getItem('collected') || '{}');
-  let lastSelfieData = null;
-  let lastCollectedId = null;
+const collected = JSON.parse(localStorage.getItem('collected') || '{}');
+let lastSelfieData = null;
+let lastCollectedId = null;
 
-  ['lawMarker','loversMarker','treeMarker'].forEach((markerId, i) => {
-    const marker = document.getElementById(markerId);
-    marker.addEventListener('markerFound', () => {
-      const hotspotId = ['law','lovers','tree'][i];
-      if(!collected[hotspotId]){
-        collected[hotspotId] = true;
-        localStorage.setItem('collected', JSON.stringify(collected));
-        lastCollectedId = hotspotId;
-        alert(`Well done! You found ${hotspotId.toUpperCase()}`);
-      }
-    });
-  });
+const markers = ['lawMarker','loversMarker','treeMarker'];
+const hotspotIds = ['law','lovers','tree'];
 
-  document.getElementById('takeSelfie').addEventListener('click', () => {
-    if(!lastCollectedId){
-      alert('Scan a marker first to take a selfie!');
-      return;
+markers.forEach((markerId,i)=>{
+  const marker = document.getElementById(markerId);
+  marker.addEventListener('markerFound', ()=>{
+    const hotspotId = hotspotIds[i];
+    if(!collected[hotspotId]){
+      collected[hotspotId] = true;
+      localStorage.setItem('collected', JSON.stringify(collected));
+      lastCollectedId = hotspotId;
+      alert(`Well done! You found ${hotspotId.toUpperCase()}`);
     }
-    const scene = document.querySelector('a-scene');
-    scene.components.screenshot.capture('perspective', (dataUri) => {
-      lastSelfieData = dataUri;
-      document.getElementById('uploadPadlet').style.display = 'block';
-      window.open(dataUri);
-    });
   });
+});
 
-  document.getElementById('uploadPadlet').addEventListener('click', () => {
-    if(!lastSelfieData){
-      alert('Take a selfie first!');
-      return;
-    }
-    window.open('https://padlet.com/nwu/desmond-tutu-school-of-medicine-kcvop1gmdyzyntoq', '_blank');
-    alert('Drag your selfie from the opened tab onto the Padlet wall.');
+// Selfie capture
+document.getElementById('takeSelfie').addEventListener('click', ()=>{
+  if(!lastCollectedId){
+    alert('Scan a marker first to take a selfie!');
+    return;
+  }
+  const scene = document.querySelector('a-scene');
+  scene.components.screenshot.capture('perspective', (dataUri)=>{
+    lastSelfieData = dataUri;
+    document.getElementById('uploadPadlet').style.display='block';
+    window.open(dataUri);
   });
+});
+
+// Upload to Padlet
+document.getElementById('uploadPadlet').addEventListener('click', ()=>{
+  if(!lastSelfieData){
+    alert('Take a selfie first!');
+    return;
+  }
+  window.open('https://padlet.com/nwu/desmond-tutu-school-of-medicine-kcvop1gmdyzyntoq', '_blank');
+  alert('Drag your selfie from the opened tab onto the Padlet wall.');
+});
+
+// Back to map
+document.getElementById('backMap').addEventListener('click', ()=>{
+  window.location.href='index-marker.html';
+});
 </script>
 
 </body>
 </html>
+
