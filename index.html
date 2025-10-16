@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <title>AR Treasure Hunt Map - Marker</title>
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; }
+    html, body {
+      margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden;
+    }
 
     /* Start overlay */
     #startScreen {
@@ -25,10 +27,10 @@
 
     /* Hotspots */
     .hotspot {
-      position: absolute; background: rgba(109, 62, 146, 0.8); color: white;
+      position: absolute; 
+      background: rgba(109, 62, 146, 0.8); color: white;
       padding: 6px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;
-      transform: translate(-50%, -50%);
-      white-space: nowrap;
+      transform: translate(-50%, -50%); white-space: nowrap;
     }
     .collected { background: rgba(0,200,0,0.8); }
   </style>
@@ -63,9 +65,10 @@ const gpsHotspots = [
 // Load collected status
 const collected = JSON.parse(localStorage.getItem('collected') || '{}');
 
-// Position hotspots on map
+// Position hotspots relative to map container
 function positionHotspots() {
-  const rect = document.getElementById('mapImage').getBoundingClientRect();
+  const container = document.getElementById('mapContainer');
+  const rect = container.getBoundingClientRect();
   const scaleX = rect.width / MAP_WIDTH;
   const scaleY = rect.height / MAP_HEIGHT;
 
@@ -73,6 +76,7 @@ function positionHotspots() {
     const el = document.getElementById(h.id);
     const left = h.x * scaleX;
     const top = h.y * scaleY;
+
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
 
@@ -95,4 +99,3 @@ document.getElementById('startButton').addEventListener('click', () => {
 
 </body>
 </html>
-
